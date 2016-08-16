@@ -51,11 +51,11 @@ clear
 ** where below this line, the text `state' (quotations included) will be replaced with dc 
 ** when this do file is run. Census' server is case sensitive, so the initials must be in
 ** lower case. */
-local state vt
+local state us
 
 /* Create another local macro, this time for the years that you wish to download. If you wish 
 ** to download more than one year, separate years with a space (e.g. 2013 2014). */
-local years 2013
+local years 2014
 
 /* Create the directory where downloaded data will be stored. On my computer I use the 
 ** directory "C:/P/ACS". If you leave this local macro unchanged, this script will make 
