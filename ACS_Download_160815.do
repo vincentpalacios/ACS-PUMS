@@ -63,7 +63,7 @@ local years 2014
 ** chance this directory to whichever path you want to store the data in, but ensure the 
 ** directory exists before running this file. */
 
-local datadir "C:/L"
+local datadir "C:/P/ACS"
 if "`datadir'" == "C:/P/ACS" {
     cap mkdir "C:/P"                                                            //    Execute a command to make a directory "P".
     cd "C:/P"
