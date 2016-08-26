@@ -21,8 +21,7 @@
 **
 ** Downloaded files need to be unzipped, imported, and saved before they can be 
 ** accessed routinely in Stata. The following code performs this process in one 
-** uninterrupted sequence for convenience and reproducibility, but only works for 
-** years 2007 and onward.
+** uninterrupted sequence for convenience and reproducibility.
 **
 ** This could also be done manually. From the directory you saved the files to, use 
 ** Stata to unzip the files. Then use the menu or the commands insheet or import 
@@ -56,7 +55,7 @@ local state us
 
 /* Create another local macro, this time for the years that you wish to download. If you wish 
 ** to download more than one year, separate years with a space (e.g. 2013 2014). */
-local years /* 2007 2008 2009 2010 2011 2012 2013 */ 2014 
+local years /* 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 */ 2014  
 
 /* Create the directory where downloaded data will be stored. On my computer I use the 
 ** directory "C:/P/ACS". If you leave this local macro unchanged, this script will make 
@@ -95,6 +94,12 @@ cd `datadir'
 ////////////////////////////////////////////////////////////////////////////////
 foreach calyear in `years' {
     local year: di %02.0f `calyear' - 2000
+    if `calyear' >= 2007 {
+        local fill_year "/1-Year"
+    }
+        else {
+        local fill_year ""
+    }
     
     quietly cd "`datadir'"
     cap confirm new file "`datadir'/`calyear'"
@@ -107,7 +112,7 @@ foreach calyear in `years' {
 
     if !_rc | "`overwrite_h'" == "1" {
         display as result "Downloading data for `calyear'h`state'.dta."
-        capture copy "http://www2.census.gov/programs-surveys/acs/data/pums/`calyear'/1-Year/csv_h`state'.zip" "`year'csv_h`state'.zip"
+        capture copy "http://www2.census.gov/programs-surveys/acs/data/pums/`calyear'`fill_year'/csv_h`state'.zip" "`year'csv_h`state'.zip"
         unzipfile "`year'csv_h`state'.zip", replace
 
         if "`state'"=="us" {
@@ -170,6 +175,12 @@ foreach calyear in `years' {
 ////////////////////////////////////////////////////////////////////////////////
 foreach calyear in `years' {
     local year: di %02.0f `calyear' - 2000
+    if `calyear' >= 2007 {
+        local fill_year "/1-Year"
+    }
+    else {
+        local fill_year ""
+    }
     
     quietly cd "`datadir'"
     cap confirm new file "`datadir'/`calyear'"
@@ -182,8 +193,8 @@ foreach calyear in `years' {
     
     if !_rc | "`overwrite_p'" == "1" {
         display as result "Downloading data for `calyear'p`state'.dta."
-        
-        capture copy "http://www2.census.gov/programs-surveys/acs/data/pums/`calyear'/1-Year/csv_p`state'.zip" "`year'csv_p`state'.zip"
+        dis "`fill_year'"
+        capture copy "http://www2.census.gov/programs-surveys/acs/data/pums/`calyear'`fill_year'/csv_p`state'.zip" "`year'csv_p`state'.zip"
         unzipfile "`year'csv_p`state'.zip", replace
 
         if "`state'"=="us" {
