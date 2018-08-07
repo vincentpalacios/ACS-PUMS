@@ -1,7 +1,7 @@
 ################################################################################
-# File name: 180802-Simple_Household_Incomeby_Race.R
+# File name: 180803-Simple_Household_Incomeby_Race.R
 # Author: Vincent Palacios
-# Last Updated: 08/02/18
+# Last Updated: 08/03/18
 # Description: Simple demonstration of how to create and tabulate houshold income
 # by race/ethnic categories from 2012-2016 ACS 5-year PUMS
 #
@@ -78,7 +78,8 @@ pums2016pop <-
       PUMA     = col_integer(),
       PINCP    = col_double(),
       HISP     = col_integer(),
-      PWGTP    = col_integer()
+      PWGTP    = col_integer(),
+      WGTP    = col_integer()
   )))
 
 # Filter to just observations in households
@@ -116,6 +117,14 @@ pums2016pop %>% count(RAC1P, HISP, wt = PWGTP)
 # Tabulate two variables, with weights, in wide format, stored as dataframe named my_table
 my_table <- pums2016pop %>% count(RAC1P, HISP, wt = PWGTP) %>% 
   spread(key = RAC1P, value = n)
+
+
+# Tabulate just variables that are factors
+# Summarize all numeric variables
+map(pums2016pop, function(x) {
+  if (is.factor(x)) return(count(x))
+  if (is.numeric(x)) return(summary(x))
+})
 
 
 
@@ -219,16 +228,14 @@ pums2016pop %>% group_by(RAC1P) %>% summarize(n = n())
 pums2016pop %>% group_by(racecat) %>% 
   summarise(weighted.mean(PINCP_adj, PWGTP, na.rm = TRUE))
 
-# Tabulation of average household income by race
+# Tabulation of average person income by race, naming result
 # Tabulate a variable using the group and summary functions while naming the result
 pums2016pop %>% group_by(racecat) %>% 
-  summarise(person_inc = weighted.mean(PINCP_adj, WGTP, na.rm = TRUE))
+  summarise(person_inc = weighted.mean(PINCP_adj, PWGTP, na.rm = TRUE))
 
 # Store results of weighted average income by race as a new object
 # NOTE: When tabulating at household level, restrict to just householder and use 
 # household weights.
-
-
 # NOTE: Wrapping a line in parantheses causes it to print to the screen when ran
 (
   hhinc_by_race <-
@@ -254,6 +261,23 @@ ggsave(
   dpi = 300
 )
 
+
+
+################################################################################
+# * QUESTIONS FOR READER
+################################################################################
+
+# 1. What does it mean to tabulate the results for people using their race category?
+# 2. What does it mean to tabulate the results for households using the householder's
+#    race category?
+# 3. Table S1902 has per capita income by race and ethnic origin 
+#    (https://factfinder.census.gov/bkmk/table/1.0/en/ACS/16_5YR/S1902/0100000US.04000).
+#    How are those estimates different from above? Hint: Who is in the universe of
+#    the PINCP variable?   
+# 4. If you adapted this code to produce per capita incomes by racecat, why would they
+#    they still differ from published estimates? Hint: What is the difference 
+#    between ACS summary and PUMS data? Hint: Are the race categories used here the 
+#    same as used by the Census?
 
 
 ################################################################################

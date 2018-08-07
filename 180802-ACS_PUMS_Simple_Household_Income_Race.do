@@ -1,7 +1,7 @@
 /*******************************************************************************
-* File name: 180802-Simple_Household_Incomeby_Race.do
+* File name: 180803-Simple_Household_Incomeby_Race.do
 * Author: Vincent Palacios
-* Last Updated: 08/02/18
+* Last Updated: 08/03/18
 * Description: Simple demonstration of how to create and tabulate houshold income
 * by race/ethnic categories from 2012-2016 ACS 5-year PUMS
 *
@@ -52,6 +52,8 @@ merge 1:m serialno using `pdc', nogenerate keep(3)
 describe
 * 32648 obs by 2 variables
 
+
+
 /*******************************************************************************
 ** 2. INSPECT DATA
 *******************************************************************************/
@@ -75,6 +77,14 @@ tab hisp rac1p [iw=pwgtp], missing
 
 * Tabulate two variables, with weights, stored as matrix named my_table
 tab hisp rac1p [iw=pwgtp], matcell(my_table) missing
+
+* Tabulate just variables that are bytes (likely categorical variables)
+ds, has(type byte)
+tab1 `r(varlist)'
+
+* Summarize all numeric variables
+ds, has(type numeric)
+summarize `r(varlist)'
 
 
 
@@ -118,12 +128,12 @@ tab2 racecat rac1p hisp, firstonly missing
 * NOTE: the approach is to group, then summarize, then merge the result with the original data
 * NOTE: since Stata can only store one dataset in memory at a time, we create 
 * temporary datasets, save our intermediate results, and merge them back together
-tempname pums2016pop household_income
-save `pums2016pop', replace
+tempfile pums2016pop household_income
+save `pums2016pop'
 
 * sum of all adjusted person income grouped by household
 collapse (sum) hincp_adj = pincp_adj, by(serialno)
-save `household_income', replace
+save `household_income'
 
 * merge above result back to main dataframe using serialno as merge key
 use `pums2016pop'
@@ -168,6 +178,22 @@ graph bar table1, over(racecat)  asyvars  ///
 graph export "plots/1_hhinc_by_race_stata.png", replace
 
 
+
+/*******************************************************************************
+* * QUESTIONS FOR READER
+*******************************************************************************/
+
+* 1. What does it mean to tabulate the results for people using their race category?
+* 2. What does it mean to tabulate the results for households using the householder's
+*    race category?
+* 3. Table S1902 has per capita income by race and ethnic origin 
+*    (https://factfinder.census.gov/bkmk/table/1.0/en/ACS/16_5YR/S1902/0100000US.04000).
+*    How are those estimates different from above? Hint: Who is in the universe of
+*    the PINCP variable?   
+* 4. If you adapted this code to produce per capita incomes by racecat, why would they
+*    they still differ from published estimates? Hint: What is the difference 
+*    between ACS summary and PUMS data? Hint: Are the race categories used here the 
+*    same as used by the Census?
 
 
 
